@@ -1,3 +1,5 @@
+import React from 'react';
+
 const SystemFooter = () => (
   <div className="flex justify-between items-end z-10 text-[9px] tracking-[0.2em] font-mono">
     <div className="flex flex-col gap-1">

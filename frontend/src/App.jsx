@@ -1,11 +1,17 @@
 import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage';
+
 
 const App = () => {
   return (
-    <div className='min-h-screen bg-[#050505]'>
-      <LoginPage/>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LoginPage />}/>
+        <Route path="/register" element={<RegisterPage />}/>
+      </Routes>
+    </Router>
   );
 }
 

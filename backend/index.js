@@ -12,13 +12,9 @@ app.use(express.json());
 
 app.use(cors());
 
-app.get("/", (req, res) => {
-  console.log(req);
-  return res.status(200).send("Hello World");
-});
 
 // To initalize a new user/identity in the system
-app.post("/api/initialize", async (req, res) => {
+app.post("/api/signup", async (req, res) => {
     try {
         const { identity_handle, email, access_key_hash } = req.body;
 
@@ -30,11 +26,21 @@ app.post("/api/initialize", async (req, res) => {
             });
         }
 
+        // Check if the identity_handle or email already exists in the system
+        const existingUser = await User.findOne({identity_handle});
+        if(existingUser){
+          return res.status(400).send({ message: "ERROR: HANDLE_ALREADY_RESERVED"});
+        }
+
+        // Hash the access key before storing
+        const salt = await bcrypt.genSalt(10);
+        const secureHash = await bcrypt.hash(access_key_hash, salt);
+
         // Creating the new identity object
         const newIdentity = {
             identity_handle: identity_handle,
             email: email,
-            access_key_hash: access_key_hash,
+            access_key_hash: secureHash,
         };
 
         const identity = await User.create(newIdentity);
@@ -52,7 +58,7 @@ app.post("/api/initialize", async (req, res) => {
         if (err.code === 11000) {
             return res.status(409).send({
                 status: "CONFLICT",
-                message: "IDENTITY_HANDLE or EMAIL already exists in the central mainframe."
+                message: "IDENTITY_HANDLE or EMAIL already exists in the central mainframe." + err.message
             });
         }
 
@@ -62,6 +68,38 @@ app.post("/api/initialize", async (req, res) => {
         });
     }
 });
+
+
+app.post("/api/login",async(req,res)=>{
+  try{
+   const { identity_handle,access_key_hash } = req.body;
+
+   if(!identity_handle || !access_key_hash){
+    return res.status(400).send({
+      message:"Send all fields: identity_handle and access_key_hash"})
+   }
+
+   //Find user y identity_handle
+   const user = await User.findOne({identity_handle});
+   if(!user){
+    return res.status(401).send({message:"User not found"});
+   }
+
+   // Compare password
+   const isMatch = await bcrypt.compare(access_key_hash,user.access_key_hash);
+   if(!isMatch){
+    return res.status(401).send({message:"Invalid credentials"});
+   }
+
+   return res.status(200).send({
+    message:"LOGIN_SUCCESS",identity:user
+   });
+  }catch(err){
+    res.status(500).send({message:err.message});
+  }
+});
+
+
 
 // Endpoint to add the opearation in the system
 app.post("/api/operations",async(req,res)=>{

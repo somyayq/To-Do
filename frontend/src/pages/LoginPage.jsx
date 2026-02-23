@@ -26,9 +26,9 @@ const LoginPage = () => {
 
     try {
       // Note: Use your actual backend URL here
-      const response = await axios.post('http://localhost:5555/api/v4/auth/access', {
+      const response = await axios.post('http://localhost:5555/api/login', {
         identity_handle: handle,
-        access_key: accessKey
+        access_key_hash: accessKey
       });
 
       // On Success
@@ -110,7 +110,8 @@ const LoginPage = () => {
             <div className="flex justify-between items-center text-[10px] tracking-[0.2em] pt-4 opacity-40 uppercase">
               <button type="button" className="hover:opacity-100 transition-opacity">Recovery</button>
               <div className="h-[1px] w-16 bg-[#1a1a1a]"></div>
-              <button type="button" className="hover:opacity-100 transition-opacity">New Instance +</button>
+              <button type="button" className="hover:opacity-100 transition-opacity"
+              onClick={()=>window.location.href='./register'}>New Instance +</button>
             </div>
           </form>
         </div>
