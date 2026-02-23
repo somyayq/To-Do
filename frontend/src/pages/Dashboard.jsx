@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [newDirective, setNewDirective] = useState("");
   const [loading, setLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState("98.4% STABLE");
+  const [activeCategory, setActiveCategory] = useState("My Day");
 
   // Fetching credentials from LocalStorage (Saved during Login)
   const agentId = localStorage.getItem("agent_id");
@@ -45,6 +46,13 @@ const Dashboard = () => {
       window.location.href = "/";
     }
   }, [agentId]);
+
+  const filteredTasks = tasks.filter((task) => {
+    if (activeCategory === "Important") return task.threat_level === "CRITICAL";
+    if (activeCategory === "Archived")
+      return task.execution_status === "TERMINATED";
+    return true; // "My Day" shows all
+  });
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -65,7 +73,7 @@ const Dashboard = () => {
     if (e.key === "Enter" && newDirective) {
       setLoading(true);
       try {
-        await axios.post(`${API_BASE}/deploy`, {
+        await axios.post(`${API_BASE}`, {
           directive: newDirective,
           intel: "MANUAL_UPLINK",
           threat_level: "LOW_THREAT",
@@ -87,6 +95,15 @@ const Dashboard = () => {
       fetchTasks(); // Refresh list to show checkbox/line-through
     } catch (err) {
       console.error("STATE_TRANSITION_FAILED", err);
+    }
+  };
+
+  const toggleStar = async (id) => {
+    try {
+      await axios.patch(`${API_BASE}/${id}/star`);
+      fetchTasks();
+    } catch (err) {
+      console.error("IMPORTANT_TOGGLE_FAILED", err);
     }
   };
 
@@ -177,13 +194,21 @@ const Dashboard = () => {
             <SidebarItem
               icon={Calendar}
               label="My Day"
-              count={tasks.length}
-              active
+              active={activeCategory === "My Day"}
+              onClick={() => setActiveCategory("My Day")}
             />
-            <SidebarItem icon={Star} label="Important" />
-            <SidebarItem icon={Calendar} label="Planned" />
-            <SidebarItem icon={LayoutGrid} label="All Nodes" />
-            <SidebarItem icon={Archive} label="Archived" />
+            <SidebarItem
+              icon={Star}
+              label="Important"
+              active={activeCategory === "Important"}
+              onClick={() => setActiveCategory("Important")}
+            />
+            <SidebarItem
+              icon={Archive}
+              label="Archived"
+              active={activeCategory === "Archived"}
+              onClick={() => setActiveCategory("Archived")}
+            />
           </nav>
 
           <button
@@ -221,20 +246,15 @@ const Dashboard = () => {
             </header>
 
             <div className="space-y-3">
-              {tasks.length > 0 ? (
-                tasks.map((task) => (
-                  <TaskRow
-                    key={task._id}
-                    task={task}
-                    onToggle={toggleTask}
-                    onDelete={deleteTask}
-                  />
-                ))
-              ) : (
-                <div className="py-20 text-center border border-dashed border-[#112226] opacity-20 text-xs tracking-[0.3em]">
-                  NO_ACTIVE_DIRECTIVES_DETECTED
-                </div>
-              )}
+              {filteredTasks.map((task) => (
+                <TaskRow
+                  key={task._id}
+                  task={task}
+                  onToggle={() => toggleTask(task._id)}
+                  onDelete={() => deleteTask(task._id)}
+                  onStar={() => toggleStar(task._id)} // <--- Add this
+                />
+              ))}
             </div>
           </div>
 
@@ -336,8 +356,9 @@ const Dashboard = () => {
 
 // --- SUB-COMPONENTS ---
 
-const SidebarItem = ({ icon: Icon, label, count, active }) => (
+const SidebarItem = ({ icon: Icon, label, count, active, onClick }) => (
   <div
+    onClick={onClick}
     className={`flex items-center justify-between p-3.5 cursor-pointer group transition-all duration-200 border-l-2 ${active ? "bg-[#00d0ff]/5 text-[#00d0ff] border-[#00d0ff]" : "border-transparent hover:bg-white/5 hover:text-white"}`}
   >
     <div className="flex items-center gap-4">

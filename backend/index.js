@@ -118,6 +118,28 @@ app.delete("/api/operations/:id", async (req, res) => {
   }
 });
 
+
+app.patch("/api/v4/operations/:id/star", async (req, res) => {
+    try {
+        const task = await Operation.findById(req.params.id);
+        // If it's already CRITICAL, make it LOW. If not, make it CRITICAL.
+        task.threat_level = task.threat_level === "CRITICAL" ? "LOW_THREAT" : "CRITICAL";
+        await task.save();
+        res.status(200).json(task);
+    } catch (err) {
+        res.status(500).json({ message: "STAR_TOGGLE_ERROR" });
+    }
+});
+
+// Example toggle route in index.js
+app.patch("/api/operations/:id/toggle", async (req, res) => {
+    const task = await Operation.findById(req.params.id);
+    // Switch between INITIALIZED and TERMINATED
+    task.execution_status = task.execution_status === "TERMINATED" ? "INITIALIZED" : "TERMINATED";
+    await task.save();
+    res.json(task);
+});
+
 // ADD OPERATION
 app.post("/api/operations", async (req, res) => {
   try {
@@ -148,6 +170,14 @@ app.post("/api/operations", async (req, res) => {
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
+});
+
+// PATCH: Toggle importance
+app.patch("/api/operations/:id/star", async (req, res) => {
+    const task = await Operation.findById(req.params.id);
+    task.threat_level = task.threat_level === "CRITICAL" ? "LOW_THREAT" : "CRITICAL";
+    await task.save();
+    res.json(task);
 });
 
 mongoose
