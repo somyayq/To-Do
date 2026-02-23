@@ -140,7 +140,7 @@ const Dashboard = () => {
             <div
               className={`w-2 h-2 rounded-full ${loading ? "bg-yellow-400" : "bg-[#00d0ff]"} animate-pulse`}
             ></div>
-            <span className="text-[10px] tracking-widest text-[#00d0ff]">
+            <span className="text-[10px] tracking-widest text-[#2CFF05]">
               {loading ? "SYNCING..." : "SYSTEM ONLINE"}
             </span>
           </div>
@@ -158,7 +158,7 @@ const Dashboard = () => {
                 <p className="text-[10px] font-bold text-white uppercase">
                   {agentHandle}
                 </p>
-                <p className="text-[9px] opacity-50 tracking-tighter">LVL_99</p>
+                <p className="text-[9px] opacity-50 tracking-tighter">LVL_1</p>
               </div>
               <div className="w-10 h-10 border border-[#00d0ff] p-0.5 rounded-sm">
                 <img
@@ -179,7 +179,7 @@ const Dashboard = () => {
             <div className="w-10 h-10 bg-[#00d0ff]/10 flex items-center justify-center border border-[#00d0ff]/20">
               <RefreshCw
                 size={20}
-                className={`text-[#00d0ff] ${loading ? "animate-spin" : ""}`}
+                className={`text-[#2CFF05] ${loading ? "animate-spin" : ""}`}
               />
             </div>
             <div>
@@ -220,8 +220,8 @@ const Dashboard = () => {
         </aside>
 
         {/* CENTER PANEL: THE FEED */}
-        <main className="flex flex-col relative bg-[#020b0d]">
-          <div className="p-12 flex-1 overflow-y-auto custom-scrollbar">
+        <main className="flex flex-col overflow-hidden bg-[#020b0d]">
+          <div className="p-12 overflow-y-auto custom-scrollbar" style={{height:'calc(90vh - 110px)'}}>
             <header className="mb-12 flex justify-between items-end">
               <div>
                 <h2 className="text-5xl font-bold tracking-tighter text-white">
@@ -259,7 +259,7 @@ const Dashboard = () => {
           </div>
 
           {/* TASK INPUT BAR */}
-          <div className="p-8 px-12 border-t border-[#112226] bg-[#020b0d]">
+          <div className="p-8 px-12 border-t border-[#112226] bg-[#020b0d] shrink-0">
             <div className="bg-[#051114] border border-[#112226] p-4 flex items-center gap-4 focus-within:border-[#00d0ff]/50 transition-all shadow-inner">
               <Plus className="opacity-20" size={20} />
               <input
@@ -375,7 +375,7 @@ const SidebarItem = ({ icon: Icon, label, count, active, onClick }) => (
   </div>
 );
 
-const TaskRow = ({ task, onToggle, onDelete }) => {
+const TaskRow = ({ task, onToggle, onDelete, onStar }) => {
   const isTerminated = task.execution_status === "TERMINATED";
 
   return (
@@ -419,9 +419,10 @@ const TaskRow = ({ task, onToggle, onDelete }) => {
         </button>
         <Star
           size={18}
+          onClick={() => onStar(task._id)}
           className={
             task.threat_level === "CRITICAL"
-              ? "text-[#00d0ff] fill-[#00d0ff] shadow-[0_0_10px_cyan]"
+              ? "text-[#2CFF05] fill-[#2CFF05] shadow-[0_0_10px_#2CFF05]"
               : "opacity-10 hover:opacity-50 transition-all cursor-pointer"
           }
         />

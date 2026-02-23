@@ -174,10 +174,14 @@ app.post("/api/operations", async (req, res) => {
 
 // PATCH: Toggle importance
 app.patch("/api/operations/:id/star", async (req, res) => {
+  try {
     const task = await Operation.findById(req.params.id);
     task.threat_level = task.threat_level === "CRITICAL" ? "LOW_THREAT" : "CRITICAL";
     await task.save();
-    res.json(task);
+    res.status(200).json(task);
+  } catch (err) {
+    res.status(500).json({ message: "STAR_TOGGLE_ERROR" });
+  }
 });
 
 mongoose
