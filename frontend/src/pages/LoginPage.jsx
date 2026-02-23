@@ -36,6 +36,7 @@ const LoginPage = () => {
       setSystemMessage(response.data.message);
       
       // Save identity data for the dashboard
+      localStorage.setItem('agent_id', response.data.user._id);
       localStorage.setItem('agent_handle', handle);
       localStorage.setItem('node_id', response.data.user?.node_id || 'NODE-UNKNOWN');
 
