@@ -11,6 +11,7 @@ const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [accessKey, setAccessKey] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [systemMessage, setSystemMessage] = useState('AWAITING_NEW_IDENTITY_DATA');
 
   const handleRegister = async (e) => {
@@ -86,11 +87,12 @@ const RegisterPage = () => {
             <TerminalInput 
               label="Secure Access Key"
               icon={Key}
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               value={accessKey}
               onChange={(e) => setAccessKey(e.target.value)}
               disabled={loading}
+              onIconClick={() => setShowPassword(!showPassword)}
             />
 
             <div className="pt-4">

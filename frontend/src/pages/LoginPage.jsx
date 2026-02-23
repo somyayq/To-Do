@@ -10,6 +10,7 @@ const LoginPage = () => {
   const [handle, setHandle] = useState('');
   const [accessKey, setAccessKey] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [systemMessage, setSystemMessage] = useState('INITIALIZATION_REQUIRED');
 
   const handleLogin = async (e) => {
@@ -59,17 +60,17 @@ const LoginPage = () => {
       
       {/* Background Decor */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-           style={{ backgroundImage: 'linear-gradient(#00bfff 1px, transparent 1px), linear-gradient(90deg, #00bfff 1px, transparent 1px)', backgroundSize: '50px 50px' }}>
+           style={{ backgroundImage: 'linear-gradient(#2CFF05 1px, transparent 1px), linear-gradient(90deg, #2CFF05 1px, transparent 1px)', backgroundSize: '50px 50px' }}>
       </div>
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00bfff]/5 to-transparent pointer-events-none animate-scanline"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#2CFF05]/5 to-transparent pointer-events-none animate-scanline"></div>
 
       <StatusHeader />
 
       <main className="flex justify-center items-center z-10">
         <div className="w-full max-w-[440px] border border-[#1a1a1a] bg-[#0a0a0a]/90 p-12 backdrop-blur-md relative">
           
-          <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#00bfff]"></div>
-          <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#00bfff]"></div>
+          <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#2CFF05]"></div>
+          <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#2CFF05]"></div>
 
           <header className="flex flex-col items-center mb-12 text-center">
             {/* Box spins while loading */}
@@ -96,11 +97,12 @@ const LoginPage = () => {
             <TerminalInput 
               label="Access Key"
               icon={Key}
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               value={accessKey}
               onChange={(e) => setAccessKey(e.target.value)}
               disabled={loading}
+              onIconClick={() => setShowPassword(!showPassword)}
             />
 
             <TerminalButton disabled={loading}>
