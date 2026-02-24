@@ -19,7 +19,12 @@ import {
   Lock,
   Trash2,
   Power,
+  AlarmClock,
+  CalendarDays,
+  CalendarSync,
 } from "lucide-react";
+import { DayPicker } from "react-day-picker"; // to import the selectable calendar component
+import "react-day-picker/dist/style.css"; // default styles for the calendar
 
 const Dashboard = () => {
   // --- STATE MANAGEMENT ---
@@ -28,6 +33,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState("98.4% STABLE");
   const [activeCategory, setActiveCategory] = useState("My Day");
+  const [terminationDate, setTerminationDate] = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [reminderTime, setReminderTime] = useState("");
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   // Fetching credentials from LocalStorage (Saved during Login)
   const agentId = localStorage.getItem("agent_id");
@@ -72,14 +81,21 @@ const Dashboard = () => {
     // Only trigger on Enter key or button click
     if (e.key === "Enter" && newDirective) {
       setLoading(true);
+      console.log("Sending:",{terminationDate,reminderTime});
       try {
         await axios.post(`${API_BASE}`, {
           directive: newDirective,
           intel: "MANUAL_UPLINK",
           threat_level: "LOW_THREAT",
           agent_id: agentId,
+          termination_date: terminationDate
+            ? terminationDate.toISOString()
+            : null,
+          reminder_time: reminderTime || null,
         });
         setNewDirective("");
+        setTerminationDate(null);
+        setReminderTime("");
         fetchTasks();
       } catch (err) {
         console.error("DEPLOYMENT_FAILED", err);
@@ -126,11 +142,11 @@ const Dashboard = () => {
       {/* TOP NAVIGATION BAR */}
       <nav className="h-16 border-b border-[#112226] flex items-center justify-between px-6 bg-[#020b0d] z-20">
         <div className="flex items-center gap-3">
-          <Box className="text-[#00d0ff]" size={28} />
+          <Box className="text-[#2CFF05]" size={28} />
           <h1 className="text-xl font-bold tracking-[0.2em] text-white">
             TASK_OS{" "}
-            <span className="text-[10px] opacity-40 font-normal text-[#00d0ff]">
-              V4.0.2
+            <span className="text-[10px] opacity-40 font-normal text-[#2CFF05]">
+              V0.0.1
             </span>
           </h1>
         </div>
@@ -144,7 +160,7 @@ const Dashboard = () => {
               {loading ? "SYNCING..." : "SYSTEM ONLINE"}
             </span>
           </div>
-          <div className="flex items-center gap-4 border-l border-[#112226] pl-6">
+          <div className="flex items-center gap-4 border-l border-[#2CFF05] pl-6">
             <Bell
               size={18}
               className="cursor-pointer hover:text-white transition-colors"
@@ -155,7 +171,7 @@ const Dashboard = () => {
             />
             <div className="flex items-center gap-3 ml-2">
               <div className="text-right">
-                <p className="text-[10px] font-bold text-white uppercase">
+                <p className="text-[15px] font-bold text-white uppercase text-shadow-[0_0_5px_#00d0ff] tracking-[0.1em] text-[#2CFF05]">
                   {agentHandle}
                 </p>
                 <p className="text-[9px] opacity-50 tracking-tighter">LVL_1</p>
@@ -172,7 +188,7 @@ const Dashboard = () => {
         </div>
       </nav>
 
-      <div className="flex-1 grid grid-cols-[280px_1fr_350px] overflow-hidden">
+      <div className="flex-1 grid grid-cols-[225px_1fr_350px] overflow-hidden">
         {/* LEFT SIDEBAR */}
         <aside className="border-r border-[#112226] flex flex-col p-6 bg-[#020b0d]/50">
           <div className="bg-[#051114] border border-[#112226] p-4 rounded-sm mb-8 flex items-center gap-4 shadow-lg shadow-black/20">
@@ -221,7 +237,10 @@ const Dashboard = () => {
 
         {/* CENTER PANEL: THE FEED */}
         <main className="flex flex-col overflow-hidden bg-[#020b0d]">
-          <div className="p-12 overflow-y-auto custom-scrollbar" style={{height:'calc(90vh - 110px)'}}>
+          <div
+            className="p-12 overflow-y-auto custom-scrollbar"
+            style={{ height: "calc(90vh - 110px)" }}
+          >
             <header className="mb-12 flex justify-between items-end">
               <div>
                 <h2 className="text-5xl font-bold tracking-tighter text-white">
@@ -261,7 +280,15 @@ const Dashboard = () => {
           {/* TASK INPUT BAR */}
           <div className="p-8 px-12 border-t border-[#112226] bg-[#020b0d] shrink-0">
             <div className="bg-[#051114] border border-[#112226] p-4 flex items-center gap-4 focus-within:border-[#00d0ff]/50 transition-all shadow-inner">
-              <Plus className="opacity-20" size={20} />
+              <Plus
+                className="opacity-80 hover:opacity-100 hover:text-[#00d0ff] transition-all"
+                size={20}
+                onClick={() => {
+                  if (newDirective) {
+                    deployOperation({ key: "Enter" });
+                  }
+                }}
+              />
               <input
                 type="text"
                 placeholder="Initialize new task protocol..."
@@ -270,16 +297,118 @@ const Dashboard = () => {
                 onChange={(e) => setNewDirective(e.target.value)}
                 onKeyDown={deployOperation}
               />
-              <div className="flex gap-5 opacity-30">
-                <Calendar
-                  size={18}
-                  className="cursor-pointer hover:text-[#00d0ff] transition-colors"
-                />
-                <Bell
-                  size={18}
-                  className="cursor-pointer hover:text-[#00d0ff] transition-colors"
-                />
-                <RefreshCw
+              {terminationDate && (
+                <span className="text-[9px] text-[#00d0ff] opacity-60 tracking-widest">
+                  {terminationDate.toLocaleDateString()}
+                </span>
+              )}
+              <div className="flex gap-5 opacity-80">
+                <div className="relative">
+                  <CalendarDays
+                    size={18}
+                    className={`cursor-pointer transition-colors ${terminationDate ? "text-[#00d0ff]" : "hover:text-[#00d0ff]"}`}
+                    onClick={() => setShowDatePicker(!showDatePicker)}
+                  />
+                  {showDatePicker && (
+                    <div className="absolute bottom-10 right-0 bg-[#051114] border border-[#00d0ff]/30 p-4 z-50 shadow-[0_0_20px_rgba(0,208,255,0.1)]">
+                      <DayPicker
+                        mode="single"
+                        selected={terminationDate}
+                        onSelect={(date) => {
+                          setTerminationDate(date);
+                          setShowDatePicker(false);
+                        }}
+                        styles={{
+                          root: {
+                            color: "#00d0ff",
+                            fontFamily: "monospace",
+                            fontSize: "12px",
+                          },
+                          caption: { color: "#ffffff" },
+                          head_cell: { color: "#00d0ff", opacity: 0.5 },
+                          day: { color: "#6eb6c1", borderRadius: "2px" },
+                          day_selected: {
+                            backgroundColor: "#00d0ff",
+                            color: "#000000",
+                          },
+                          day_today: { color: "#ffffff", fontWeight: "bold" },
+                          nav_button: { color: "#00d0ff" },
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="relative">
+                  <AlarmClock
+                    size={18}
+                    className={`cursor-pointer transition-colors ${reminderTime ? "text-[#00d0ff] opacity-100" : "hover:text-[#00d0ff]"}`}
+                    onClick={() => setShowTimePicker(!showTimePicker)}
+                  />
+                  {showTimePicker && (
+                    <div className="absolute bottom-10 right-0 bg-[#051114] border border-[#00d0ff]/30 p-4 z-50 shadow-[0_0_20px_rgba(0,208,255,0.1)] w-48">
+                      <p className="text-[9px] tracking-[0.3em] uppercase text-[#00d0ff] mb-3 opacity-60">
+                        Set Reminder
+                      </p>
+
+                      {/* Quick options */}
+                      <div className="space-y-1 mb-3">
+                        {[
+                          {
+                            label: "Later Today",
+                            value: () => {
+                              const d = new Date();
+                              d.setHours(d.getHours() + 3);
+                              return d.toTimeString().slice(0, 5);
+                            },
+                          },
+                          { label: "Tomorrow Morning", value: () => "09:00" },
+                          { label: "Tonight", value: () => "20:00" },
+                        ].map((opt) => (
+                          <button
+                            key={opt.label}
+                            onClick={() => {
+                              setReminderTime(opt.value());
+                              setShowTimePicker(false);
+                            }}
+                            className="w-full text-left text-[10px] tracking-widest uppercase p-2 hover:bg-[#00d0ff]/10 hover:text-[#00d0ff] transition-all text-[#6eb6c1]"
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Custom time input */}
+                      <div className="border-t border-[#112226] pt-3">
+                        <p className="text-[9px] tracking-[0.2em] uppercase opacity-40 mb-2">
+                          Custom Time
+                        </p>
+                        <input
+                          type="time"
+                          className="w-full bg-transparent text-[#00d0ff] text-xs outline-none font-mono border border-[#112226] p-2 focus:border-[#00d0ff]/50"
+                          value={reminderTime}
+                          onChange={(e) => {
+                            setReminderTime(e.target.value);
+                            setShowTimePicker(false);
+                          }}
+                        />
+                      </div>
+
+                      {/* Clear option */}
+                      {reminderTime && (
+                        <button
+                          onClick={() => {
+                            setReminderTime("");
+                            setShowTimePicker(false);
+                          }}
+                          className="w-full text-center text-[9px] tracking-widest uppercase p-2 mt-2 text-red-500/50 hover:text-red-500 transition-all"
+                        >
+                          Clear Reminder
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <CalendarSync
                   size={18}
                   className="cursor-pointer hover:text-[#00d0ff] transition-colors"
                 />
@@ -306,7 +435,7 @@ const Dashboard = () => {
           <div className="flex-1">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-[#00d0ff]">
-                Chronos_Interface
+                INTEL_LOG
               </h3>
             </div>
             <div className="flex justify-between items-center mb-6">
@@ -375,7 +504,7 @@ const SidebarItem = ({ icon: Icon, label, count, active, onClick }) => (
   </div>
 );
 
-const TaskRow = ({ task, onToggle, onDelete, onStar }) => {
+const TaskRow = ({ task, onToggle, onDelete, onStar}) => {
   const isTerminated = task.execution_status === "TERMINATED";
 
   return (
@@ -401,8 +530,14 @@ const TaskRow = ({ task, onToggle, onDelete, onStar }) => {
           <span className="text-[8px] flex items-center gap-1.5 tracking-[0.1em] uppercase opacity-40">
             <Folder size={10} /> {task.intel || "GENERAL_DATA"}
           </span>
+          {task.termination_date && (
+            <span className="text-[8px] flex items-center gap-1.5 tracking-[0.1em] uppercase opacity-50">
+              <CalendarDays size={10} />{" "}
+              {new Date(task.termination_date).toLocaleDateString()}
+            </span>
+          )}
           {task.threat_level === "CRITICAL" && (
-            <span className="text-[8px] flex items-center gap-1.5 tracking-[0.1em] uppercase text-red-500/80">
+            <span className="text-[8px] items-center gap-1.5 tracking-[0.1em] uppercase text-red-500/80">
               <Lock size={10} /> CRITICAL_PRIORITY
             </span>
           )}
@@ -427,6 +562,8 @@ const TaskRow = ({ task, onToggle, onDelete, onStar }) => {
           }
         />
       </div>
+
+      {/*add the date display inside the content area*/}
     </div>
   );
 };

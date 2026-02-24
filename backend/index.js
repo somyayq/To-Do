@@ -143,7 +143,7 @@ app.patch("/api/operations/:id/toggle", async (req, res) => {
 // ADD OPERATION
 app.post("/api/operations", async (req, res) => {
   try {
-    const { directive, intel, threat_level, agent_id, termination_date } =
+    const { directive, intel, threat_level, agent_id, termination_date , reminder_time} =
       req.body;
 
     if (!directive || !agent_id) {
@@ -160,6 +160,7 @@ app.post("/api/operations", async (req, res) => {
       threat_level,
       agent_id,
       termination_date,
+      reminder_time,
     });
 
     return res.status(201).send({

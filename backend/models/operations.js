@@ -47,6 +47,16 @@ const OperationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
+  termination_date: {
+    type: Date,
+    default: null,
+  },
+
+  reminder_time: {
+    type: String,
+    default: null,
+  },
 });
 
 export const Operation = mongoose.model("Operation", OperationSchema);
