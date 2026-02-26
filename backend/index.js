@@ -1,4 +1,5 @@
 import express from "express";
+import axios from "axios";
 import { PORT, MONGO_URI } from "./config.js";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -118,40 +119,45 @@ app.delete("/api/operations/:id", async (req, res) => {
   }
 });
 
-
 app.patch("/api/v4/operations/:id/star", async (req, res) => {
-    try {
-        const task = await Operation.findById(req.params.id);
-        // If it's already CRITICAL, make it LOW. If not, make it CRITICAL.
-        task.threat_level = task.threat_level === "CRITICAL" ? "LOW_THREAT" : "CRITICAL";
-        await task.save();
-        res.status(200).json(task);
-    } catch (err) {
-        res.status(500).json({ message: "STAR_TOGGLE_ERROR" });
-    }
+  try {
+    const task = await Operation.findById(req.params.id);
+    // If it's already CRITICAL, make it LOW. If not, make it CRITICAL.
+    task.threat_level =
+      task.threat_level === "CRITICAL" ? "LOW_THREAT" : "CRITICAL";
+    await task.save();
+    res.status(200).json(task);
+  } catch (err) {
+    res.status(500).json({ message: "STAR_TOGGLE_ERROR" });
+  }
 });
 
 // Example toggle route in index.js
 app.patch("/api/operations/:id/toggle", async (req, res) => {
-    const task = await Operation.findById(req.params.id);
-    // Switch between INITIALIZED and TERMINATED
-    task.execution_status = task.execution_status === "TERMINATED" ? "INITIALIZED" : "TERMINATED";
-    await task.save();
-    res.json(task);
+  const task = await Operation.findById(req.params.id);
+  // Switch between INITIALIZED and TERMINATED
+  task.execution_status =
+    task.execution_status === "TERMINATED" ? "INITIALIZED" : "TERMINATED";
+  await task.save();
+  res.json(task);
 });
 
 // ADD OPERATION
 app.post("/api/operations", async (req, res) => {
   try {
-    const { directive, intel, threat_level, agent_id, termination_date , reminder_time} =
-      req.body;
+    const {
+      directive,
+      intel,
+      threat_level,
+      agent_id,
+      termination_date,
+      reminder_time,
+    } = req.body;
 
     if (!directive || !agent_id) {
-      return res
-        .status(400)
-        .send({
-          message: "VALIDATION_ERROR: directive and agent_id are required.",
-        });
+      return res.status(400).send({
+        message: "VALIDATION_ERROR: directive and agent_id are required.",
+      });
     }
 
     const operation = await Operation.create({
@@ -177,11 +183,23 @@ app.post("/api/operations", async (req, res) => {
 app.patch("/api/operations/:id/star", async (req, res) => {
   try {
     const task = await Operation.findById(req.params.id);
-    task.threat_level = task.threat_level === "CRITICAL" ? "LOW_THREAT" : "CRITICAL";
+    task.threat_level =
+      task.threat_level === "CRITICAL" ? "LOW_THREAT" : "CRITICAL";
     await task.save();
     res.status(200).json(task);
   } catch (err) {
     res.status(500).json({ message: "STAR_TOGGLE_ERROR" });
+  }
+});
+
+app.get("/api/quote", async (req, res) => {
+  try {
+    const response = await axios.get("https://api.api-ninjas.com/v1/quotes", {
+      headers: { "X-Api-Key": "TLxK9546BEnhLZJaYiocRE9e0nSt0QPEIVLRkhwQ" },
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ message: "QUOTE_FETCH_FAILED" });
   }
 });
 
