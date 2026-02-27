@@ -194,10 +194,6 @@ const Dashboard = () => {
             </span>
           </div>
           <div className="flex items-center gap-4 border-l border-[#2CFF05] pl-6">
-            <Bell
-              size={18}
-              className="cursor-pointer hover:text-white transition-colors"
-            />
             <Settings
               size={18}
               className="cursor-pointer hover:text-white transition-colors"
