@@ -21,7 +21,7 @@ const RegisterPage = () => {
 
     try {
       // Calling your Backend Registration Route
-      const response = await axios.post('http://localhost:5555/api/signup', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/signup`, {
         identity_handle: handle,
         email: email,
         access_key_hash: accessKey // We send it to backend to be hashed

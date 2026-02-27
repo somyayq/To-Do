@@ -50,7 +50,7 @@ const Dashboard = () => {
   const agentHandle = localStorage.getItem("agent_handle") || "CORE_ADMIN";
   const nodeId = localStorage.getItem("node_id") || "NODE_01";
 
-  const API_BASE = "http://localhost:5555/api/operations";
+  const API_BASE = `${import.meta.env.VITE_API_URL}/api/operations`;
 
   // --- LOGIC HANDLERS ---
 
