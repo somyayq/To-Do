@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import axios from "axios";
 import {
   LayoutGrid,
@@ -37,6 +37,13 @@ const Dashboard = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [reminderTime, setReminderTime] = useState("");
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [quote, setQuote] = useState({
+    text: "Efficiency is the bridge between goals and accomplishment.",
+    author: "System_Msg // 0xAF32",
+  });
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(new Date().getDate());
 
   // Fetching credentials from LocalStorage (Saved during Login)
   const agentId = localStorage.getItem("agent_id");
@@ -54,6 +61,7 @@ const Dashboard = () => {
       // Safety: If no agent ID, boot back to login
       window.location.href = "/";
     }
+    fetchQuote(); // Fetch the quote on component mount
   }, [agentId]);
 
   const filteredTasks = tasks.filter((task) => {
@@ -81,7 +89,7 @@ const Dashboard = () => {
     // Only trigger on Enter key or button click
     if (e.key === "Enter" && newDirective) {
       setLoading(true);
-      console.log("Sending:",{terminationDate,reminderTime});
+      console.log("Sending:", { terminationDate, reminderTime });
       try {
         await axios.post(`${API_BASE}`, {
           directive: newDirective,
@@ -135,6 +143,31 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/";
+  };
+
+  // calling the frontest call to fetch the quote
+  const fetchQuote = async () => {
+    try {
+      setQuoteLoading(true);
+      const res = await axios.get("http://localhost:5555/api/quote");
+
+      const quoteText = res.data[0].quote;
+      // If quote length is too long , fetch again
+      if (quoteText.length > 100) {
+        setQuoteLoading(false);
+        fetchQuote();
+        return;
+      }
+
+      setQuote({
+        text: res.data[0].quote,
+        author: res.data[0].author,
+      });
+    } catch (err) {
+      console.error("QUOTE_FETCH_FAILED", err);
+    } finally {
+      setQuoteLoading(false);
+    }
   };
 
   return (
@@ -408,10 +441,10 @@ const Dashboard = () => {
                     </div>
                   )}
                 </div>
-                <CalendarSync
+                {/* <CalendarSync
                   size={18}
                   className="cursor-pointer hover:text-[#00d0ff] transition-colors"
-                />
+                /> */}
               </div>
             </div>
           </div>
@@ -424,50 +457,191 @@ const Dashboard = () => {
               className="absolute -top-3 left-4 text-[#00d0ff] bg-[#051114] px-1"
               size={24}
             />
-            <p className="italic text-lg leading-relaxed text-white font-serif mt-2">
-              "Efficiency is the bridge between goals and accomplishment."
+            <p
+              className={`italic text-lg leading-relaxed text-white font-serif mt-2 transition-all duration-300 ${quoteLoading ? "opacity-20" : "opacity-100"}`}
+            >
+              "{quote.text}"
             </p>
-            <p className="text-[9px] mt-4 opacity-30 tracking-[0.3em] uppercase">
-              — System_Msg // 0xAF32
-            </p>
+            <div className="flex justify-between items-center mt-4">
+              <p className="text-[9px] opacity-30 tracking-[0.3em] uppercase">
+                -{quote.author}
+              </p>
+              <button
+                onClick={fetchQuote}
+                className="text-[9px] tracking-widest uppercase opacity-30 hover:opacity-100 hover:text-[#00d0ff] transition-all flex items-center gap-1"
+              >
+                <RefreshCw
+                  size={10}
+                  className={quoteLoading ? "animate-spin" : ""}
+                />
+                New
+              </button>
+            </div>
           </div>
 
           <div className="flex-1">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-[#00d0ff]">
-                INTEL_LOG
+              <h3 className="text-[10px] font-bold tracking-[04em] uppercase text-[#00d0ff]">
+                LOGS
               </h3>
             </div>
             <div className="flex justify-between items-center mb-6">
               <span className="text-xs font-bold text-white uppercase tracking-widest">
-                Oct <span className="opacity-30">.2024</span>
+                {currentMonth.toLocaleDateString("en-US", { month: "short" })}
+                <span className="opacity-30">
+                  .{currentMonth.getFullYear()}
+                </span>
               </span>
               <div className="flex gap-4">
                 <ChevronLeft
                   size={16}
-                  className="opacity-30 cursor-pointer hover:opacity-100"
+                  className="opacity-30 cursor-pointer hover:opacity-100 hover:text-[#00d0ff] transition-all"
+                  onClick={() =>
+                    setCurrentMonth(
+                      new Date(
+                        currentMonth.getFullYear(),
+                        currentMonth.getMonth() - 1,
+                      ),
+                    )
+                  }
                 />
+
                 <ChevronRight
                   size={16}
-                  className="opacity-30 cursor-pointer hover:opacity-100"
+                  className="opacity-30 cursor-pointer hover:opacity-100 hover:text-[#00d0ff] transition-all"
+                  onClick={() =>
+                    setCurrentMonth(
+                      new Date(
+                        currentMonth.getFullYear(),
+                        currentMonth.getMonth() + 1,
+                      ),
+                    )
+                  }
                 />
               </div>
             </div>
-            <div className="grid grid-cols-7 gap-y-5 text-[10px] text-center opacity-40">
-              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-                <div key={d} className="font-bold">
+
+            {/* Day headers */}
+            <div className="grid grid-cols-7 gap-y-3 text-[10px] text-center">
+              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => {
+                <div key={d} className="font-bold opacity-40">
                   {d}
-                </div>
-              ))}
-              {Array.from({ length: 31 }, (_, i) => (
-                <div
-                  key={i}
-                  className={`py-1 rounded-sm ${i === 23 ? "bg-[#00d0ff] text-black font-bold shadow-[0_0_10px_#00d0ff]" : ""}`}
-                >
-                  {i + 1}
-                </div>
-              ))}
+                </div>;
+              })}
+
+              {/* Empty cells for first dat offset */}
+              {Array.from(
+                {
+                  length: new Date(
+                    currentMonth.getFullYear(),
+                    currentMonth.getMonth(),
+                    1,
+                  ).getDay(),
+                },
+                (_, i) => (
+                  <div key={`empty-${i}`} />
+                ),
+              )}
+
+              {/* Day cells */}
+              {Array.from(
+                {
+                  length: new Date(
+                    currentMonth.getFullYear(),
+                    currentMonth.getMonth() + 1,
+                    0,
+                  ).getDate(),
+                },
+                (_, i) => {
+                  const day = i + 1;
+                  const today = new Date();
+                  const isToday =
+                    day === today.getDate() &&
+                    currentMonth.getMonth() === today.getMonth() &&
+                    currentMonth.getFullYear() === today.getFullYear();
+
+                  const isSelected =
+                    day === selectedDay &&
+                    currentMonth.getMonth() === new Date().getMonth() &&
+                    currentMonth.getFullYear() === new Date().getFullYear();
+
+                  // to check if the task has this date or log
+                  const hasTask = tasks.some((task) => {
+                    if (!task.termination_date) return false;
+                    const taskDate = new Date(task.termination_date);
+                    return (
+                      taskDate.getDate() === day &&
+                      taskDate.getMonth() === currentMonth.getMonth() &&
+                      taskDate.getFullYear() === currentMonth.getFullYear()
+                    );
+                  });
+
+                  return (
+                    <div
+                      key={day}
+                      onClick={() => setSelectedDay(day)}
+                      className={`py-1 rounded-sm cursor-pointer transition-all relative
+            ${isToday ? "bg-[#00d0ff] text-black font-bold shadow-[0_0_10px_#00d0ff]" : ""}
+            ${isSelected && !isToday ? "border border-[#00d0ff]/50 text-[#00d0ff]" : ""}
+            ${!isToday && !isSelected ? "opacity-40 hover:opacity-100 hover:bg-white/5" : ""}
+          `}
+                    >
+                      {day}
+                      {/* Blue dot for tasks */}
+                      {hasTask && !isToday && (
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#00d0ff] rounded-full"></div>
+                      )}
+                    </div>
+                  );
+                },
+              )}
             </div>
+
+            {/* Tasks for selected day */}
+            {tasks.filter((task) => {
+              if (!task.termination_date) return false;
+              const taskDate = new Date(task.termination_date);
+              return (
+                taskDate.getDate() === selectedDay &&
+                taskDate.getMonth() === currentMonth.getMonth() &&
+                taskDate.getFullYear() === currentMonth.getFullYear()
+              );
+            }).length > 0 && (
+              <div className="mt-6 border-t border-[#112226] pt-4">
+                <p className="text-[9px] tracking-[0.3em] uppercase text-[#00d0ff] opacity-60 mb-3">
+                  Tasks on this day
+                </p>
+                {tasks
+                  .filter((task) => {
+                    if (!task.termination_date) return false;
+                    const taskDate = new Date(task.termination_date);
+                    return (
+                      taskDate.getDate() === selectedDay &&
+                      taskDate.getMonth() === currentMonth.getMonth() &&
+                      taskDate.getFullYear() === currentMonth.getFullYear()
+                    );
+                  })
+                  .map((task) => (
+                    <div
+                      key={task._id}
+                      className="text-[10px] tracking-widest text-[#6eb6c1] py-2 border-b border-[#112226]/50 flex items-center gap-2"
+                    >
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${task.execution_status === "TERMINATED" ? "bg-[#00d0ff]" : "bg-green-400 animate-pulse"}`}
+                      ></div>
+                      <span
+                        className={
+                          task.execution_status === "TERMINATED"
+                            ? "line-through opacity-40"
+                            : ""
+                        }
+                      >
+                        {task.directive}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
 
           <div className="mt-auto pt-6 border-t border-[#112226] flex justify-between items-center text-[9px] opacity-30 tracking-[0.1em]">
@@ -504,7 +678,7 @@ const SidebarItem = ({ icon: Icon, label, count, active, onClick }) => (
   </div>
 );
 
-const TaskRow = ({ task, onToggle, onDelete, onStar}) => {
+const TaskRow = ({ task, onToggle, onDelete, onStar }) => {
   const isTerminated = task.execution_status === "TERMINATED";
 
   return (
