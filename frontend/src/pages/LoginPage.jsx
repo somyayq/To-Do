@@ -91,6 +91,7 @@ const LoginPage = () => {
             <TerminalInput 
               label="Identity Handle"
               icon={Fingerprint}
+              id="identity_handle"
               placeholder="user@task.os"
               value={handle}
               onChange={(e) => setHandle(e.target.value)}
@@ -100,6 +101,7 @@ const LoginPage = () => {
             <TerminalInput 
               label="Access Key"
               icon={Key}
+              id="access_key"
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               value={accessKey}

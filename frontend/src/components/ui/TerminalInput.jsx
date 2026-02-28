@@ -2,7 +2,9 @@ import React from 'react';
 
 const TerminalInput = ({ label, icon: Icon, onIconClick, ...props }) => (
   <div className="space-y-2 group">
-    <label className="text-[10px] tracking-[0.2em] opacity-70 block uppercase">
+    <label 
+    htmlFor={props.id}
+    className="text-[10px] tracking-[0.2em] opacity-70 block uppercase">
       {label}
     </label>
     <div className="relative">
