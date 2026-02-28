@@ -25,6 +25,8 @@ const LoginPage = () => {
     setLoading(true);
     setSystemMessage("ESTABLISHING_SECURE_CONNECTION...");
 
+    
+
     try {
       // Note: Use your actual backend URL here
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`, {

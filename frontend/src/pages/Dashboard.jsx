@@ -149,7 +149,7 @@ const Dashboard = () => {
   const fetchQuote = async () => {
     try {
       setQuoteLoading(true);
-      const res = await axios.get("http://localhost:5555/api/quote");
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/quote`);
 
       const quoteText = res.data[0].quote;
       // If quote length is too long , fetch again
