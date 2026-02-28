@@ -102,6 +102,7 @@ const LoginPage = () => {
               label="Access Key"
               icon={Key}
               id="access_key"
+              name="access_key"
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               value={accessKey}

@@ -104,52 +104,6 @@ app.get("/api/operations/:agent_id", async (req, res) => {
   }
 });
 
-// TOGGLE OPERATION
-app.patch("/api/operations/:id/toggle", async (req, res) => {
-  try {
-    const task = await Operation.findById(req.params.id);
-    task.execution_status =
-      task.execution_status === "TERMINATED" ? "ACTIVE" : "TERMINATED"; // fixed typo: exectuion_status
-    await task.save();
-    res.status(200).json(task); // fixed: was missing response
-  } catch (err) {
-    res.status(500).json({ message: "TOGGLE_ERROR" });
-  }
-});
-
-// DELETE OPERATION
-app.delete("/api/operations/:id", async (req, res) => {
-  try {
-    await Operation.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "OPERATION_DELETED" });
-  } catch (err) {
-    res.status(500).json({ message: "DELETION_ERROR" }); // fixed typo
-  }
-});
-
-app.patch("/api/v4/operations/:id/star", async (req, res) => {
-  try {
-    const task = await Operation.findById(req.params.id);
-    // If it's already CRITICAL, make it LOW. If not, make it CRITICAL.
-    task.threat_level =
-      task.threat_level === "CRITICAL" ? "LOW_THREAT" : "CRITICAL";
-    await task.save();
-    res.status(200).json(task);
-  } catch (err) {
-    res.status(500).json({ message: "STAR_TOGGLE_ERROR" });
-  }
-});
-
-// Example toggle route in index.js
-app.patch("/api/operations/:id/toggle", async (req, res) => {
-  const task = await Operation.findById(req.params.id);
-  // Switch between INITIALIZED and TERMINATED
-  task.execution_status =
-    task.execution_status === "TERMINATED" ? "INITIALIZED" : "TERMINATED";
-  await task.save();
-  res.json(task);
-});
-
 // ADD OPERATION
 app.post("/api/operations", async (req, res) => {
   try {
@@ -187,6 +141,43 @@ app.post("/api/operations", async (req, res) => {
   }
 });
 
+// //TOGGLE OPERATION
+// app.patch("/api/operations/:id/toggle", async (req, res) => {
+//   try {
+//     const task = await Operation.findById(req.params.id);
+//     task.execution_status =
+//       task.execution_status === "TERMINATED" ? "ACTIVE" : "TERMINATED"; // fixed typo: exectuion_status
+//     await task.save();
+//     res.status(200).json(task); // fixed: was missing response
+//   } catch (err) {
+//     res.status(500).json({ message: "TOGGLE_ERROR" });
+//   }
+// });
+
+
+app.patch("/api/operations/:id", async (req, res) => {
+  try {
+    const task = await Operation.findById(req.params.id);
+    // If it's already CRITICAL, make it LOW. If not, make it CRITICAL.
+    task.threat_level =
+      task.threat_level === "CRITICAL" ? "LOW_THREAT" : "CRITICAL";
+    await task.save();
+    res.status(200).json(task);
+  } catch (err) {
+    res.status(500).json({ message: "STAR_TOGGLE_ERROR" });
+  }
+});
+
+// Example toggle route in index.js
+app.patch("/api/operations/:id/toggle", async (req, res) => {
+  const task = await Operation.findById(req.params.id);
+  // Switch between INITIALIZED and TERMINATED
+  task.execution_status =
+    task.execution_status === "TERMINATED" ? "INITIALIZED" : "TERMINATED";
+  await task.save();
+  res.json(task);
+});
+
 // PATCH: Toggle importance
 app.patch("/api/operations/:id/star", async (req, res) => {
   try {
@@ -197,6 +188,16 @@ app.patch("/api/operations/:id/star", async (req, res) => {
     res.status(200).json(task);
   } catch (err) {
     res.status(500).json({ message: "STAR_TOGGLE_ERROR" });
+  }
+});
+
+// DELETE OPERATION
+app.delete("/api/operations/:id", async (req, res) => {
+  try {
+    await Operation.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "OPERATION_DELETED" });
+  } catch (err) {
+    res.status(500).json({ message: "DELETION_ERROR" }); // fixed typo
   }
 });
 
