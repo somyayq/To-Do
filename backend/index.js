@@ -1,9 +1,17 @@
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: join(__dirname, ".env") }); // fixed: .env not ./env
+
 import express from "express";
 import axios from "axios";
 import { PORT, MONGO_URI } from "./config.js";
 import mongoose from "mongoose";
 import cors from "cors";
-import bcrypt from "bcryptjs"; // ADD THIS - you're using bcrypt but never imported it
+import bcrypt from "bcryptjs";
 import { User } from "./models/users.js";
 import { Operation } from "./models/operations.js";
 
