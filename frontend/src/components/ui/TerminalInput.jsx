@@ -1,6 +1,6 @@
 import React from 'react';
 
-const TerminalInput = ({ label, icon: Icon, onIconClick, ...props }) => (
+const TerminalInput = ({ label, icon: Icon, ...props }) => (
   <div className="space-y-2 group">
     <label 
     htmlFor={props.id}
