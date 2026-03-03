@@ -17,11 +17,7 @@ import { Operation } from "./models/operations.js";
 
 const app = express();
 app.use(express.json());
-app.use(cors({
-  origin: ["https://to-do-chi-brown.vercel.app/", "http://localhost:5173"],
-  methods: ["GET", "POST", "PATCH", "DELETE"],
-  credentials: true
-}));
+app.use(cors());
 
 // SIGNUP
 app.post("/api/signup", async (req, res) => {
