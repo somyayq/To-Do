@@ -119,7 +119,7 @@ const LoginPage = () => {
               <button type="button" className="hover:opacity-100 transition-opacity">Recovery</button>
               <div className="h-[1px] w-16 bg-[#1a1a1a]"></div>
               <button type="button" className="hover:opacity-100 transition-opacity"
-              onClick={()=>window.location.href='./register'}>New Instance +</button>
+              onClick={()=>window.location.href='./RegisterPage.jsx'}>New Instance +</button>
             </div>
           </form>
         </div>
