@@ -1,2 +1,2 @@
 export const PORT = process.env.PORT || 5555;
-export const MONGO_URI = "mongodb+srv://somya1297be23_db_user:5R3jHrZ8RV96dOBb@cluster0.1hu80fb.mongodb.net/ToDo?retryWrites=true&w=majority&appName=Cluster0";
+export const MONGO_URI = "mongodb://atlas-sql-69a27ac131ee53a2ecc13f1c-hjql3s.a.query.mongodb.net/ToDo?ssl=true&authSource=admin";
